@@ -32,9 +32,9 @@ def add_models(Base):
         
         user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
         user = relationship('User', backref=backref('jira', uselist=False), uselist=False)
-        name = Column(String)
-        oauth_token = Column(String, nullable=True)
-        oauth_secret = Column(String, nullable=True)
+        name = Column(String(75))
+        oauth_token = Column(String(36), nullable=True)
+        oauth_secret = Column(String(36), nullable=True)
         expires = Column(DateTime, nullable=True)
         revoked = Column(Boolean)
         
