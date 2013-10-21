@@ -6,12 +6,12 @@ def add_options(parser, env):
     
     parser.add_option('--kaichu-jira-host',
                       action='store',
-                      default=env.get('kaichu-jira-host', ''),
+                      default=env.get('kaichu_jira_host', ''),
                       dest='kaichu_jira_host',
                       help='Base URL of Jira instance.')
     parser.add_option('--kaichu-jira-project-key',
                       action='store',
-                      default=env.get('kaichu-jira-project-key', ''),
+                      default=env.get('kaichu_jira_project_key', ''),
                       dest='kaichu_jira_project_key',
                       help='Key of project for kaichu to report to.')
     parser.add_option('--rerun-from-jira-issue',
@@ -21,7 +21,7 @@ def add_options(parser, env):
                       help='Key or id of jira issue tracking a failure.')
     parser.add_option('--kaichu-jira-app-key',
                       action='store',
-                      default=env.get('kaichu-jira-app-key'),
+                      default=env.get('kaichu_jira_app_key'),
                       dest='kaichu_jira_app_key',
                       help='OAuth app key for jira.')
 #    parser.add_option('--kaichu-ignore-previous-results',
@@ -36,11 +36,24 @@ class KaichuManager(object):
     @classmethod
     def enabled(cls, tissue, options, noseconfig):
         
-        return (options.kaichu_jira_host
-                and options.pocket_change_username
-                and (options.pocket_change_password or options.pocket_change_token)
-                and options.kaichu_jira_app_key
-                and options.kaichu_jira_project_key)
+        if (options.kaichu_jira_host
+            and options.pocket_change_username
+            and (options.pocket_change_password or options.pocket_change_token)
+            and options.kaichu_jira_app_key
+            and options.kaichu_jira_project_key):
+            try:
+                KaichuManager.jira = JiraClient(options.pocket_change_host,
+                                                options.kaichu_jira_host,
+                                                options.kaichu_jira_app_key,
+                                                options.pocket_change_username,
+                                                options.pocket_change_password,
+                                                options.pocket_change_token)
+            except ValueError:
+                return False
+            else:
+                return True
+        else:
+            return True
     
     def __init__(self, tissue, options, noseconfig):
         
@@ -53,12 +66,15 @@ class KaichuManager(object):
         getLogger('requests').setLevel(CRITICAL)
         getLogger('oauthlib').setLevel(CRITICAL)
         self.tissue = tissue
-        self.jira = JiraClient(options.pocket_change_host,
-                               options.kaichu_jira_host,
-                               options.kaichu_jira_app_key,
-                               options.pocket_change_username,
-                               options.pocket_change_password,
-                               options.pocket_change_token)
+        if hasattr(KaichuManager, 'jira') and KaichuManager.jira:
+            self.jira = KaichuManager.jira
+        else:
+            self.jira = JiraClient(options.pocket_change_host,
+                                   options.kaichu_jira_host,
+                                   options.kaichu_jira_app_key,
+                                   options.pocket_change_username,
+                                   options.pocket_change_password,
+                                   options.pocket_change_token)
         self.jira_project_key = options.kaichu_jira_project_key
         self.test_cycle_issue = None
     
