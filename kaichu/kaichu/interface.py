@@ -53,7 +53,7 @@ class KaichuManager(object):
             else:
                 return True
         else:
-            return True
+            return False
     
     def __init__(self, tissue, options, noseconfig):
         
