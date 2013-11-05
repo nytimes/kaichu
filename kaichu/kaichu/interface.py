@@ -14,11 +14,11 @@ def add_options(parser, env):
                       default=env.get('kaichu_jira_project_key', ''),
                       dest='kaichu_jira_project_key',
                       help='Key of project for kaichu to report to.')
-    parser.add_option('--rerun-from-jira-issue',
-                      action='store',
-                      default='',
-                      dest='jira_issue_rerun',
-                      help='Key or id of jira issue tracking a failure.')
+#    parser.add_option('--rerun-from-jira-issue',
+#                      action='store',
+#                      default='',
+#                      dest='jira_issue_rerun',
+#                      help='Key or id of jira issue tracking a failure.')
     parser.add_option('--kaichu-jira-app-key',
                       action='store',
                       default=env.get('kaichu_jira_app_key'),
@@ -42,15 +42,24 @@ class KaichuManager(object):
             and options.kaichu_jira_app_key
             and options.kaichu_jira_project_key):
             try:
-                KaichuManager.jira = JiraClient(options.pocket_change_host,
-                                                options.kaichu_jira_host,
-                                                options.kaichu_jira_app_key,
-                                                options.pocket_change_username,
-                                                options.pocket_change_password,
-                                                options.pocket_change_token)
+                if hasattr(noseconfig, 'kaichu_jira_oauth'):
+                    KaichuManager.jira = JiraClient(options.pocket_change_host,
+                                                    options.kaichu_jira_host,
+                                                    options.kaichu_jira_app_key,
+                                                    oauth_data=noseconfig.kaichu_jira_oauth)
+                else:
+                    KaichuManager.jira = JiraClient(options.pocket_change_host,
+                                                    options.kaichu_jira_host,
+                                                    options.kaichu_jira_app_key,
+                                                    options.pocket_change_username,
+                                                    options.pocket_change_password,
+                                                    options.pocket_change_token)
             except ValueError:
                 return False
             else:
+                noseconfig.kaichu_jira_oauth = (KaichuManager.jira.rsa_key,
+                                                KaichuManager.jira.resource_owner_key,
+                                                KaichuManager.jira.resource_owner_secret)
                 return True
         else:
             return False
@@ -69,12 +78,21 @@ class KaichuManager(object):
         if hasattr(KaichuManager, 'jira') and KaichuManager.jira:
             self.jira = KaichuManager.jira
         else:
-            self.jira = JiraClient(options.pocket_change_host,
-                                   options.kaichu_jira_host,
-                                   options.kaichu_jira_app_key,
-                                   options.pocket_change_username,
-                                   options.pocket_change_password,
-                                   options.pocket_change_token)
+            if hasattr(noseconfig, 'kaichu_jira_oauth'):
+                self.jira = JiraClient(options.pocket_change_host,
+                                       options.kaichu_jira_host,
+                                       options.kaichu_jira_app_key,
+                                       oauth_data=noseconfig.kaichu_jira_oauth)
+            else:
+                self.jira = JiraClient(options.pocket_change_host,
+                                       options.kaichu_jira_host,
+                                       options.kaichu_jira_app_key,
+                                       options.pocket_change_username,
+                                       options.pocket_change_password,
+                                       options.pocket_change_token)
+                noseconfig.kaichu_jira_oauth = (self.jira.rsa_key,
+                                                self.jira.resource_owner_key,
+                                                self.jira.resource_owner_secret)
         self.jira_project_key = options.kaichu_jira_project_key
         self.test_cycle_issue = None
     
