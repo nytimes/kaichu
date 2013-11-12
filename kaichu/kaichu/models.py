@@ -8,9 +8,9 @@ def add_models(Base):
     
     class TestCycleIssue(Base):
         
-        __tablename__ = 'testCycleIssue'
+        __tablename__ = 'test_cycle_issue'
         
-        test_cycle_id = Column(Integer, ForeignKey('testCycle.id'), primary_key=True)
+        test_cycle_id = Column(Integer, ForeignKey('test_cycle.id'), primary_key=True)
         test_cycle = relationship('TestCycle',
                                   backref=backref('jira_issue', uselist=False), uselist=False)
         issue_id = Column(Integer)
@@ -18,9 +18,9 @@ def add_models(Base):
     
     class CaseExecutionIssue(Base):
         
-        __tablename__ = 'testCaseExecutionIssue'
+        __tablename__ = 'test_case_execution_issue'
         
-        case_execution_id = Column(Integer, ForeignKey('testCaseExecution.id'), primary_key=True)
+        case_execution_id = Column(Integer, ForeignKey('test_case_execution.id'), primary_key=True)
         case_execution = relationship('CaseExecution',
                                       backref=backref('jira_issue', uselist=False), uselist=False)
         issue_id = Column(Integer)
@@ -28,7 +28,7 @@ def add_models(Base):
     
     class UserJiraData(Base):
         
-        __tablename__ = 'userJiraData'
+        __tablename__ = 'user_jira_data'
         
         user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
         user = relationship('User', backref=backref('jira', uselist=False), uselist=False)
