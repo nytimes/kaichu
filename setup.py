@@ -1,10 +1,20 @@
 from setuptools import setup, find_packages
 
 setup(name='kaichu',
-      version='0.0.0',
+      version='0.0.1',
+      author='Silas Ray',
+      author_email='silas.ray@nytimes.com',
+      license='Apache2.0',
+      url='https://github.com/NYTimes/kaichu',
+      description='A Sneeze plugin for JIRA integration',
+      long_description="A Sneeze plugin that integrates with JIRA via JIRA's REST API.",
+      classifiers=['Development Status :: 4 - Beta',
+                   'Intended Audience :: Information Technology',
+                   'Topic :: Software Development :: Quality Assurance',
+                   'Topic :: Software Development :: Testing'],
       packages=find_packages(),
       install_requires=['jira-python',
-                        'sneeze'],
+                        'nose-sneeze'],
       entry_points={'nose.plugins.sneeze.plugins.add_models' : ['kaichu_models = kaichu.models:add_models'],
                     'nose.plugins.sneeze.plugins.add_options' : ['kaichu_options = kaichu.interface:add_options'],
                     'nose.plugins.sneeze.plugins.managers' : ['kaichu_manager = kaichu.interface:KaichuManager']})
